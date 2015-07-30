@@ -14,6 +14,8 @@ public class CameraController : MonoBehaviour {
 
 	Vector2 axis1;
 	Vector2 axis2;
+	float camToPlayer;
+	float playerAngle;
 	float playerPosX;
 	float playerPosY;
 	float playerPosZ;
@@ -39,6 +41,8 @@ public class CameraController : MonoBehaviour {
 		playerPosX = tran.position.x;
 		playerPosY = tran.position.y;
 		playerPosZ = tran.position.z;
+		playerAngle =  Quaternion.Angle (camTran.rotation, tran.rotation);
+		camToPlayer = (tran.position - camTran.position).magnitude;
 		axis1 = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical"));
 		axis2 = new Vector2 (Input.GetAxisRaw ("Horizontal2"), Input.GetAxisRaw ("Vertical2"));
 
@@ -48,37 +52,37 @@ public class CameraController : MonoBehaviour {
 		if (hCameraRotation < 0) {
 			hCameraRotation += 360;
 		}
-			
-		if (Physics.Raycast (tran.position, camTran.position - tran.position, out hit, restingDistance, layerMask)) {
-			camDist = Mathf.SmoothDamp(camDist, hit.distance, ref rence, 0.1f);
-		} else {
-			camDist = Mathf.SmoothDamp(camDist, restingDistance, ref rence, 0.6f);
-		}
+		if (!(camToPlayer < restingDistance && camToPlayer > restingDistance/2 && playerAngle > 45)) { 	
+			if (Physics.Raycast (tran.position, camTran.position - tran.position, out hit, restingDistance, layerMask)) {
+				camDist = Mathf.SmoothDamp(camDist, hit.distance, ref rence, 0.1f);
+			} else {
+				camDist = Mathf.SmoothDamp(camDist, restingDistance, ref rence, 0.6f);
+			}
 
 
-		vCameraRotation += axis2.y * vSensitivity * Time.deltaTime;
-
-		if (axis2.sqrMagnitude == 0) {
-			hCameraRotation = Mathf.SmoothDampAngle (hCameraRotation, tran.eulerAngles.y, ref renceH, 0.55f);
-			vCameraRotation = Mathf.SmoothDampAngle (vCameraRotation, restingAngle, ref renceV, 0.2f);
-		} else {
-			hCameraRotation += axis2.x * hSensitivity * Time.deltaTime;
 			vCameraRotation += axis2.y * vSensitivity * Time.deltaTime;
+
+			if (axis2.sqrMagnitude == 0) {
+				hCameraRotation = Mathf.SmoothDampAngle (hCameraRotation, tran.eulerAngles.y, ref renceH, 0.55f);
+				vCameraRotation = Mathf.SmoothDampAngle (vCameraRotation, restingAngle, ref renceV, 0.2f);
+			} else {
+				hCameraRotation += axis2.x * hSensitivity * Time.deltaTime;
+				vCameraRotation += axis2.y * vSensitivity * Time.deltaTime;
+			}
+
+			if (vCameraRotation > upperCameraLimit) {
+				vCameraRotation = upperCameraLimit;
+			} 
+			if (vCameraRotation < lowerCameraLimit) {
+				vCameraRotation = lowerCameraLimit;
+			} 
+
+			camPosX = playerPosX + camDist * Mathf.Sin (-hCameraRotation * Mathf.Deg2Rad) * Mathf.Cos (vCameraRotation * Mathf.Deg2Rad);
+			camPosY = playerPosY + camDist * Mathf.Sin (vCameraRotation * Mathf.Deg2Rad);
+			camPosZ = playerPosZ - camDist * Mathf.Cos (vCameraRotation * Mathf.Deg2Rad) * Mathf.Cos (-hCameraRotation * Mathf.Deg2Rad);
+
+			camTran.eulerAngles = new Vector3 (vCameraRotation, hCameraRotation, 0);
 		}
-
-		if (vCameraRotation > upperCameraLimit) {
-			vCameraRotation = upperCameraLimit;
-		} 
-		if (vCameraRotation < lowerCameraLimit) {
-			vCameraRotation = lowerCameraLimit;
-		} 
-
-		camPosX = playerPosX + camDist * Mathf.Sin (-hCameraRotation * Mathf.Deg2Rad) * Mathf.Cos (vCameraRotation * Mathf.Deg2Rad);
-		camPosY = playerPosY + camDist * Mathf.Sin (vCameraRotation * Mathf.Deg2Rad);
-		camPosZ = playerPosZ - camDist * Mathf.Cos (vCameraRotation * Mathf.Deg2Rad) * Mathf.Cos (-hCameraRotation * Mathf.Deg2Rad);
-
-		camTran.eulerAngles = new Vector3 (vCameraRotation, hCameraRotation, 0);
-
 		camTran.position = new Vector3 (camPosX, camPosY, camPosZ);
 
 	}
