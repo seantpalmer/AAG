@@ -18,7 +18,8 @@ public class CameraController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		camTran.LookAt (tran);
+		//camTran.LookAt (tran);
+		camTran.position = new Vector3 (tran.position.x, tran.position.y + minDist, tran.position.z - maxDist);
 	}
 
 	// FixedUpdate is called fifty times per second

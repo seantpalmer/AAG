@@ -46,7 +46,6 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scrips\AbilityController.cs" />
      <Compile Include="Assets\Scrips\CameraController.cs" />
      <Compile Include="Assets\Scrips\Controller.cs" />
  <Reference Include="UnityEngine.UI">
